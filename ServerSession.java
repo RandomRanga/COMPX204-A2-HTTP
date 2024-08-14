@@ -62,18 +62,14 @@ class HttpServerSession extends Thread {
 		try {
 			reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
 		
-			
+			String lines;
             // read a line of text from one client and send itto all other clients
-            if(reader.readLine()!= ""){
-                String in = reader.readLine();
-                System.out.println(in);
+            while ((lines = reader.readLine()) != null && !lines.isEmpty()){
+                System.out.println(lines);
             }
-            else{
-                System.out.println("emtpy");
-            }
-            //httpServer.sayToAll(this, in);
             
-
+            
+            s.close();
 
 		} 
         catch (Exception e) {
