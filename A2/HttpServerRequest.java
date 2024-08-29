@@ -11,31 +11,37 @@ class HttpServerRequest
 
     public void process(String in)
     {
-	/*
-	 * process the line, setting 'done' when HttpServerSession should
-	 * examine the contents of the request using getFile and getHost
-	 */
+	
+	// process the line, setting 'done' when HttpServerSession should
+	// examine the contents of the request using getFile and getHost
+            
+        if (in == null || in.isEmpty()) {
+            // End of headers, request is complete
+            done = true;
+            return;
+        }
+
+
+
+        // System.out.println(in);
         String parts[] = in.split(" ");
         String filename = "";
+        String hostname = "";
 
         if(parts[0].compareTo("GET") == 0){
             filename = parts[1].substring(1);
         }
 
         if(parts[0].compareTo("Host:") == 0){
-            String hostname = parts[1].substring(4);
+            hostname = parts[1].substring(4);
         }
 
         if(filename.endsWith("/")){
             filename += "index.html";
         }
 
-        
-
+      
         line++;
-
-
-
-
+        
     }
 }
