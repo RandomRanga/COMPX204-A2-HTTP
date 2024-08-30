@@ -25,19 +25,19 @@ class HttpServerRequest
 
         // System.out.println(in);
         String parts[] = in.split(" ");
-        String filename = "";
+   
         String hostname = "";
 
         if(parts[0].compareTo("GET") == 0){
-            filename = parts[1].substring(1);
+            file = parts[1].substring(1);
         }
 
         if(parts[0].compareTo("Host:") == 0){
             hostname = parts[1].substring(4);
         }
 
-        if(filename.endsWith("/")){
-            filename += "index.html";
+        if(file.endsWith("/") || file.isEmpty()){
+            file += "index.html";
         }
 
       

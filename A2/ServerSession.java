@@ -44,6 +44,7 @@ class HttpServer
             System.out.println("catch in httpserver");
             System.err.println(e);
         }
+       
     }
 }
 
@@ -87,51 +88,65 @@ class HttpServerSession extends Thread {
             }
             System.out.println("outside while");
 
-            httpServerRequest.getFile();
+            String hostname = httpServerRequest.getHost();
+
+            File filename = new File(httpServerRequest.getFile());
+            
+            String filePath; 
             
 
-            String hostname;
-
-            if((hostname = httpServerRequest.getHost()) == null){
-                hostname = "localhost:59876/" + httpServerRequest.getFile();
-                System.out.println("small if ");
+            if(hostname == null){
+                hostname = "localhost:59876";
+                System.out.println("small if");
             }
-            else{
-                hostname += "/" + httpServerRequest.getFile();
-                System.out.println("small else ");
-            }
+          
+            filePath = hostname +"/" + filename;
+            
 
 
-            File file = new File(hostname);
+            File file = new File(filePath);
 
-            if(file.exists() && !file.isDirectory()){
+            System.out.println(hostname);
+            System.out.println(filename);
 
-                System.out.println("if file exists or not directory ");
+            // if(filename.exists() && !filename.isDirectory()){
+            try {
                 
-                println(bos, "HTTP/1.1 200 OK");
-                println(bos, "");
-                println(bos, "hello world");
+            
+                System.out.println("if file exists and not directory ");
+                
                 
 
+                
+            
+                System.out.print(filename);
 
                 byte[] byteArray = new byte[59876];
-                fileStream = new FileInputStream(file);
+                fileStream = new FileInputStream(filename);
                 int readByte;
                 while((readByte = fileStream.read(byteArray)) != -1){
                     bos.write(byteArray, 0, readByte);
                 }
 
+                println(bos, "HTTP/1.1 200 OK/r/n");
+                println(bos, "");
             
                 fileStream.close();
             }
-            else{
-                println(bos, "Http/1.1 200 OK");
-                println(bos, "Http/1.1 200 OK");
-                println(bos, "Http/1.1 200 OK");
+            // }
+            // else{
+            catch(FileNotFoundException ex){
+                println(bos, "Http/1.1 404 File Not Foundr/n");
+                println(bos, "");
+                System.out.println(ex.toString());
                 System.out.println("in to the else ");
             }
-            s.close();
+            // }
+           
+
+            System.out.println("flush");
             bos.flush();
+            s.close();
 
 		} 
         
@@ -155,7 +170,4 @@ class HttpServerSession extends Thread {
         }
         return true;
     }
-
-
-
 }
