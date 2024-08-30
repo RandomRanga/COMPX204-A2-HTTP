@@ -122,6 +122,7 @@ class HttpServerSession extends Thread {
                 fileStream = new FileInputStream(filename);
                 int readByte;
                 while((readByte = fileStream.read(byteArray)) != -1){
+                    sleep(1000);
                     bos.write(byteArray, 0, readByte);
                 }
 
