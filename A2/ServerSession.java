@@ -2,75 +2,86 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 
-class HttpServer {
-    public static void main(String args[]) {
+class HttpServer
+{
+    public static void main(String args[])
+    {   
 
-        // the port we will run from.
+        //the port we will run from. 
         int port = 59876;
-        try {
-            // creates a server socket to listen on the correct port and shows it.
+        try{
+            //creates a server socket to listen on the correct port and shows it. 
             ServerSocket ss = new ServerSocket(port);
             System.out.println("Server is listening on port " + port);
 
-            // keeps the server running
-            while (true) {
+            //keeps the server running 
+            while(true){
                 System.out.println("httpserver in the while ");
 
-                // accepts all incoming connections
+                //accepts all incoming connections 
                 Socket s = ss.accept();
-
-                // writes it to client
+              
+                
+                //writes it to client
                 System.out.println("Web Server Starting");
-            
-                //System.out.println("Your IP address is " + ip);
 
-                // create a new httpserver object then should be able to print out the correct
-                // thing.
-                HttpServerSession httpServer = new HttpServerSession(s);
+                InetAddress ia = s.getInetAddress();          
+                String ip = ia.getHostAddress();
+                System.out.println("Your IP address is " + ip);
+
+           
+                //create a new httpserver object then should be able to print out the correct thing. 
+                HttpServerSession httpServer = new HttpServerSession(null, s);
                 httpServer.start();
-
+                
+                
+               
             }
 
         }
-        // catches and prints out any errors
-        catch (Exception e) {
+        //catches and prints out any errors
+        catch (Exception e){
             System.out.println("catch in httpserver");
             System.err.println(e);
         }
-
+       
     }
 }
 
+
+
+
 class HttpServerSession extends Thread {
-    // each session gets a thread
-   // private HttpServer httpServer;
+    //each session gets a thread
+    private HttpServer httpServer;
     private Socket s;
     private BufferedReader reader;
     private BufferedOutputStream bos;
     private FileInputStream fileStream;
 
-    public HttpServerSession(Socket s) {
-        // socket the client uses
+
+    public HttpServerSession(HttpServer httpServer, Socket s){
+        //socket the client uses 
         this.s = s;
-        // reference to the main thread in the server
-        //this.httpServer = httpServer;
+        //reference to the main thread in the server
+        this.httpServer = httpServer;
     }
-
     public void run() { // entry point into the HttpServerSession
-        try {
-
+		try {
+            
             System.err.println(" bigg try ");
-            reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
+			reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
             bos = new BufferedOutputStream(s.getOutputStream());
-
             HttpServerRequest httpServerRequest = new HttpServerRequest();
+			
 
-            // loop until HttpServerRequest:: is done()returns true
-            while (!httpServerRequest.isDone()) {
-
+            //loop until HttpServerRequest:: is done()returns true
+            while(!httpServerRequest.isDone()){
+                
                 String line = reader.readLine();
 
-                // pass line into request
+               
+                //pass line into request 
                 httpServerRequest.process(line);
 
                 System.out.println("while loop ");
@@ -79,132 +90,78 @@ class HttpServerSession extends Thread {
 
             String hostname = httpServerRequest.getHost();
 
-            if(hostname == null) {
+            File filename = new File(httpServerRequest.getFile());
+            
+            String filePath; 
+            
+
+            if(hostname == null){
                 hostname = "localhost:59876";
+                System.out.println("small if");
             }
+          
+            filePath = hostname +"/" + filename;
+            
 
-            // String filePath = httpServerRequest.getFile();
-            // System.out.println("Requested file path: " + filePath);
-            // File file = new File(filePath);
-            // File filename = new File(httpServerRequest.getFile());
 
-            // if(hostname == null){
-            // hostname = "localhost:59876";
-            // System.out.println("small if");
-            // }
+            File file = new File(filePath);
 
-            // filePath = hostname +"/" + filename;
+            System.out.println(hostname);
+            System.out.println(filename);
 
-            // File file = new File(filePath);>
-            // System.out.println(hostname);
-            // System.out.println(filename);
-
-            try {
-
-                // String filePath = httpServerRequest.getFile();
-                // System.out.println("Requested file path: " + filePath);
-                // File file = new File(filePath);
-                // File filename = new File(httpServerRequest.getFile());
-
-                // if (hostname == null) {
-                //     hostname = "localhost:59876";
-                //     System.out.println("small if");
-                // }
-
-                System.out.println("insisde try");
-                System.out.println(hostname);
-                System.out.println(httpServerRequest.getFile());
-
-                FileInputStream  fileInputStream = new FileInputStream(httpServerRequest.getFile());
-                
-                System.out.println("after fileinput stream. ");
-
-                byte[] byteArray = new byte[59876];
-                while (fileInputStream.read(byteArray) != -1) {
-                    bos.write(byteArray);
-                    
-                }
-                System.out.println("after byte array");
-
-                //String filePath = (hostname + "/" + httpServerRequest.getFile()).toString();
-
-                // File file = new File(filePath);
-                System.out.println(hostname);
-                //System.out.println(filename);
-
+            if(filename.exists() && !filename.isDirectory()){
+           
                 System.out.println("if file exists and not directory ");
+                
+                System.out.print(filename);
 
-              
                 println(bos, "HTTP/1.1 200 OK");
                 println(bos, "");
 
-               //System.out.print(file);
+                byte[] byteArray = new byte[59876];
+                fileStream = new FileInputStream(filename);
+                int readByte;
+                while((readByte = fileStream.read(byteArray)) != -1){
+                    bos.write(byteArray, 0, readByte);
+                }
 
-
-             
-
-                // while ((readByte = fileStream.read(byteArray)) != -1) {
-                //     bos.write(byteArray, 0, readByte);
-                // }
-
-                fileInputStream.close();
-
-
-            } catch (FileNotFoundException e) {
-                
-
-                System.out.println("in to the else ");
-
+               
+            
+                fileStream.close();
+            }
+            
+            else{
+            
                 println(bos, "HTTP/1.1 404 Not Found");
                 println(bos, "");
+             
+                System.out.println("in to the else ");
             }
-
-            // if(file.exists() && !file.isDirectory()){
-
-            // System.out.println("if file exists and not directory ");
-
-            // println(bos, "HTTP/1.1 200 OK");
-            // println(bos, "");
-
-            // System.out.print(file);
-
-            // byte[] byteArray = new byte[59876];
-            // fileStream = new FileInputStream(file);
-            // int readByte;
-            // while((readByte = fileStream.read(byteArray)) != -1){
-            // bos.write(byteArray, 0, readByte);
-            // }
-
-            // fileStream.close();
-
-            // }
-            // else{
-            // System.out.println("in to the else ");
-
-            // println(bos, "HTTP/1.1 404 Not Found");
-            // println(bos, "");
-
-            // }
+            
+           
 
             System.out.println("flush");
             bos.flush();
             s.close();
 
-        }
-
+		} 
+        
         catch (Exception e) {
-            System.err.println("Exception: " + e);
+			System.err.println("Exception: " + e);
             System.out.println("biggest catch");
-        }
+		}
+        
 
     }
 
-    private boolean println(BufferedOutputStream bos, String s) {
+
+    private boolean println(BufferedOutputStream bos, String s)
+    {
         String news = s + "\r\n";
         byte[] array = news.getBytes();
         try {
             bos.write(array, 0, array.length);
-        } catch (IOException e) {
+        } catch(IOException e) {
             return false;
         }
         return true;

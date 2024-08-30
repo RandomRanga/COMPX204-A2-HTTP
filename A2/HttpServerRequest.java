@@ -39,14 +39,9 @@ class HttpServerRequest
         if(file.endsWith("/") || file.isEmpty()){
             file += "index.html";
         }
-        else{
-            file += ""; 
-        }
 
       
         line++;
         
     }
-} // String filePath = httpServerRequest.getFile();
-// System.out.println("Requested file path: " + filePath);
-// File file = new File(filePath);
+}
